@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>게시글 수정</h1>
+    <p class="loading-text">loading...</p>
+    <div class="update-wrapper">
+      <span>작성자: </span>
+      <span class="author-text">author</span>
+      <div class="input-group">
+        <div>
+          <input
+            class="title-input"
+            type="text"
+            placeholder="제목을 입력하세요"
+          />
+        </div>
+        <div>
+          <textarea
+            class="content-textarea"
+            placeholder="내용을 입력하세요"
+          ></textarea>
+        </div>
+        <div>
+          <button class="update-btn">수정</button>
+        </div>
+      </div>
+      <div>
+        <a href="./list.html">게시글 목록으로 돌아가기</a>
+      </div>
+    </div>
+
+    <script type="module">
+      import { getArticle, updateArticle } from "./article.js";
+
+      const params = new URLSearchParams(location.search);
+      const id = params.get("id");
+
+      const loadingText = document.querySelector(".loading-text");
+      const updateWrapper = document.querySelector(".update-wrapper");
+      const author = document.querySelector(".author-text");
+      const titleInput = document.querySelector(".title-input");
+      const contentTextarea = document.querySelector(".content-textarea");
+      const updateBtn = document.querySelector(".update-btn");
+
+      updateWrapper.style.display = "none";
+
+      const result = await getArticle(id);
+      if (result === 404) {
+        alert("게시글이 존재하지 않습니다.");
+        location.href = "./list.html";
+      }
+
+      author.textContent = result.author;
+      titleInput.value = result.title;
+      contentTextarea.value = result.content;
+
+      async function updateHandler() {
+        if (
+          !titleInput.value ||
+          titleInput.value.trim() === "" ||
+          !contentTextarea.value ||
+          contentTextarea.value.trim() === ""
+        )
+          return;
+        if (
+          result.title === titleInput.value.trim() &&
+          result.content === contentTextarea.value.trim()
+        ) {
+          alert("원래의 제목/내용과 같습니다.");
+          return;
+        }
+        const updateResult = await updateArticle(
+          result,
+          titleInput.value.trim(),
+          contentTextarea.value.trim()
+        );
+        if (updateResult === "permission-denied") {
+          alert("수정 권한이 없습니다.");
+          return;
+        }
+        alert("수정 성공");
+        location.href = `./detail.html?id=${updateResult}`;
+      }
+
+      updateBtn.addEventListener("click", updateHandler);
+
+      loadingText.style.display = "none";
+      updateWrapper.style.display = "block";
+    </script>
+  </body>
+</html>

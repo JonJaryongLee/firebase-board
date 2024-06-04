@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>게시글 상세조회</h1>
+    <p class="loading-text">loading...</p>
+    <div class="detail-wrapper">
+      <div>
+        <span>id: </span>
+        <span class="id-data">id</span>
+      </div>
+      <div>
+        <span>title: </span>
+        <span class="title-data">title</span>
+      </div>
+      <div>
+        <span>content: </span>
+        <span class="content-data">content</span>
+      </div>
+      <div>
+        <span>createdAt: </span>
+        <span class="created-at-data">createdAt</span>
+      </div>
+      <div>
+        <span>updatedAt: </span>
+        <span class="updated-at-data">updatedAt</span>
+      </div>
+      <div>
+        <span>author: </span>
+        <span class="author-data">author</span>
+      </div>
+      <a class="update-link" href="#">게시글 수정</a>
+      <button class="delete-btn">게시글 삭제</button>
+      <div>
+        <a href="./list.html">게시글 목록으로 돌아가기</a>
+      </div>
+    </div>
+
+    <!-- dayjs -->     
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.11/dayjs.min.js"></script>
+    <script type="module">
+      import { getArticle, deleteArticle } from "./article.js";
+
+      const params = new URLSearchParams(location.search);
+      const id = params.get("id");
+
+      const loadingText = document.querySelector(".loading-text");
+      const detailWrapper = document.querySelector(".detail-wrapper");
+      const idData = document.querySelector(".id-data");
+      const titleData = document.querySelector(".title-data");
+      const contentData = document.querySelector(".content-data");
+      const createdAtData = document.querySelector(".created-at-data");
+      const updatedAtData = document.querySelector(".updated-at-data");
+      const authorData = document.querySelector(".author-data");
+      const updateLink = document.querySelector(".update-link");
+      const deleteBtn = document.querySelector(".delete-btn");
+
+      detailWrapper.style.display = "none";
+
+      const result = await getArticle(id);
+      if (result === "permission-denied") {
+        alert("로그인이 필요합니다.");
+        location.href = "../auth/login.html";
+      } else if (result === 404) {
+        alert("게시글이 존재하지 않습니다.");
+        location.href = "./list.html";
+      }
+
+      const createdDate = new Date(result.createdAt.seconds * 1000);
+      const formattedCreatedDate = dayjs(createdDate).format(
+        "YYYY.MM.DD HH:mm:ss"
+      );
+
+      const updatedDate = new Date(result.updatedAt.seconds * 1000);
+      const formattedUpdatedDate = dayjs(updatedDate).format(
+        "YYYY.MM.DD HH:mm:ss"
+      );
+
+      idData.textContent = result.id;
+      titleData.textContent = result.title;
+      contentData.textContent = result.content;
+      createdAtData.textContent = formattedCreatedDate;
+      updatedAtData.textContent = formattedUpdatedDate;
+      authorData.textContent = result.author;
+
+      updateLink.href = `./update.html?id=${result.id}`;
+
+      deleteBtn.addEventListener("click", async () => {
+        const deleteResult = await deleteArticle(result.id);
+        if (deleteResult === "permission-denied") {
+          alert("삭제 권한이 없습니다.");
+          return;
+        }
+        location.href = "./list.html";
+      });
+
+      loadingText.style.display = "none";
+      detailWrapper.style.display = "block";
+    </script>
+  </body>
+</html>

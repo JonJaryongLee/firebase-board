@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>게시글 목록</h1>
+    <p class="loading-text">loading...</p>
+    <div class="list-wrapper">
+      <p>
+        <span>현재 로그인한 유저: </span>
+        <span class="email-data">email</span>
+      </p>
+      <button class="logout-btn">로그아웃</button>
+      <hr />
+      <ul class="article-ul">
+        <li>
+          <div>
+            <span>id: </span>
+            <span class="id-data">
+              <a href="#">id</a>
+            </span>
+          </div>
+          <div>
+            <span>title: </span>
+            <span class="title-data">title</span>
+          </div>
+          <div>
+            <span>author: </span>
+            <span class="author-data">author</span>
+          </div>
+        </li>
+      </ul>
+      <div>
+        <a href="./create.html">게시글 생성</a>
+      </div>
+    </div>
+
+    <script type="module">
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+      import { auth } from "../app.js";
+      import { logout } from "../auth/auth.js";
+      import { getArticles } from "./article.js";
+
+      const loadingText = document.querySelector(".loading-text");
+      const listWrapper = document.querySelector(".list-wrapper");
+      const emailData = document.querySelector(".email-data");
+      const logoutBtn = document.querySelector(".logout-btn");
+      const articleUl = document.querySelector(".article-ul");
+
+      listWrapper.style.display = "none";
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          emailData.textContent = user.email;
+        }
+      });
+
+      const result = await getArticles();
+      if (result === "permission-denied") {
+        alert("로그인이 필요합니다.");
+        location.href = "../auth/login.html";
+      }
+
+      let articleLis = "";
+
+      result.forEach((article) => {
+        articleLis += `
+            <li>
+              <div>
+                <span>id: </span>
+                <span class="id-data">
+                  <a href="./detail.html?id=${article.id}">${article.id}</a>
+                </span>
+              </div>
+              <div>
+                <span>title: </span>
+                <span class="title-data">${article.title}</span>
+              </div>
+              <div>
+                <span>author: </span>
+                <span class="author-data">${article.author}</span>
+              </div>
+            </li>
+          `;
+      });
+      articleUl.innerHTML = articleLis;
+
+      logoutBtn.addEventListener("click", async () => {
+        const result = await logout();
+        if (result === true) {
+          location.href = "../index.html";
+        } else {
+          alert("로그아웃 실패");
+        }
+      });
+
+      loadingText.style.display = "none";
+      listWrapper.style.display = "block";
+    </script>
+  </body>
+</html>
