@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <p class="loading-wrapper">loading...</p>
+    <div class="detail-page" style="display: none">
+      <h1>게시글 상세조회</h1>
+      <div>
+        <span>author: </span>
+        <span class="author-data">id</span>
+      </div>
+      <div>
+        <span>title: </span>
+        <span class="title-data">title</span>
+      </div>
+      <div>
+        <span>content: </span>
+        <span class="content-data">content</span>
+      </div>
+      <div>
+        <span>createdAt: </span>
+        <span class="created-at-data">createdAt</span>
+      </div>
+      <div>
+        <span>updatedAt: </span>
+        <span class="updated-at-data">updatedAt</span>
+      </div>
+      <div class="edit-delete-container">
+        <a class="update-link" href="#">게시글 수정</a>
+        <button class="delete-btn">게시글 삭제</button>
+      </div>
+      <a href="./list.html">게시글 목록으로 돌아가기</a>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.11/dayjs.min.js"></script>
+    <script type="module">
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+      import { auth } from "../app.js";
+      import { getArticle, deleteArticle } from "./article.js";
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+        }
+      });
+
+      const params = new URLSearchParams(location.search);
+      const id = params.get("id");
+      let currentUser;
+
+      const loadingWrapper = document.querySelector(".loading-wrapper");
+      const detailPage = document.querySelector(".detail-page");
+      const authorData = document.querySelector(".author-data");
+      const titleData = document.querySelector(".title-data");
+      const contentData = document.querySelector(".content-data");
+      const createdAtData = document.querySelector(".created-at-data");
+      const updatedAtData = document.querySelector(".updated-at-data");
+      const editDeleteContainer = document.querySelector(
+        ".edit-delete-container"
+      );
+
+      const updateLink = document.querySelector(".update-link");
+      const deleteBtn = document.querySelector(".delete-btn");
+
+      const result = await getArticle(id);
+
+      if (currentUser === undefined || currentUser.email !== result.author) {
+        editDeleteContainer.style.display = "none";
+      }
+
+      if (result === "permission-denied") {
+        alert("권한이 없습니다.");
+        location.href = "../auth/login.html";
+      }
+
+      const parsedStep1CreatedAt = new Date(result.createdAt.seconds * 1000);
+      const parsedStep1UpdatedAt = new Date(result.updatedAt.seconds * 1000);
+
+      const parsedStep2CreatedAt = dayjs(parsedStep1CreatedAt).format(
+        "YYYY.MM.DD HH:mm:ss"
+      );
+      const parsedStep2UpdatedAt = dayjs(parsedStep1UpdatedAt).format(
+        "YYYY.MM.DD HH:mm:ss"
+      );
+
+      authorData.textContent = result.author;
+      titleData.textContent = result.title;
+      contentData.textContent = result.content;
+      createdAtData.textContent = parsedStep2CreatedAt;
+      updatedAtData.textContent = parsedStep2UpdatedAt;
+
+      updateLink.href = `./update.html?id=${result.id}`;
+      deleteBtn.addEventListener("click", async () => {
+        const result = await deleteArticle(id);
+        if (result === "permission-denied") {
+          alert("권한이 없습니다.");
+          return;
+        }
+        alert("삭제 성공");
+        location.href = "./list.html";
+      });
+
+      loadingWrapper.style.display = "none";
+      detailPage.style.display = "block";
+    </script>
+  </body>
+</html>

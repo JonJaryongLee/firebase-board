@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <p class="loading-wrapper">loading...</p>
+    <div class="update-page" style="display: none">
+      <h1>게시글 수정</h1>
+      <div class="input-group">
+        <div>
+          <input
+            class="title-input"
+            type="text"
+            placeholder="제목을 입력하세요"
+          />
+        </div>
+        <div>
+          <textarea
+            class="content-textarea"
+            placeholder="내용을 입력하세요"
+          ></textarea>
+        </div>
+        <div>
+          <button class="update-btn">수정</button>
+        </div>
+      </div>
+      <div>
+        <a href="./list.html">게시글 목록으로 돌아가기</a>
+      </div>
+    </div>
+    <script type="module">
+      import { getArticle, updateArticle } from "./article.js";
+
+      const params = new URLSearchParams(location.search);
+      const id = params.get("id");
+
+      const loadingWrapper = document.querySelector(".loading-wrapper");
+      const updatePage = document.querySelector(".update-page");
+      const titleInput = document.querySelector(".title-input");
+      const contentTextarea = document.querySelector(".content-textarea");
+      const updateBtn = document.querySelector(".update-btn");
+
+      const result = await getArticle(id);
+
+      titleInput.value = result.title;
+      contentTextarea.value = result.content;
+
+      updateBtn.addEventListener("click", async () => {
+        if (
+          !titleInput.value ||
+          titleInput.value.trim() === "" ||
+          !contentTextarea.value ||
+          contentTextarea.value.trim() === ""
+        )
+          return;
+        const parsedTitle = titleInput.value.trim();
+        const parsedContent = contentTextarea.value.trim();
+        if (result.title === parsedTitle && result.content === parsedContent) {
+          alert("원래의 제목/내용과 같습니다.");
+          return;
+        }
+        const updateResult = await updateArticle(
+          id,
+          parsedTitle,
+          parsedContent
+        );
+        if (updateResult === "permission-denied") {
+          alert("권한이 없습니다.");
+          return;
+        }
+        alert("수정 성공");
+        location.href = `./detail.html?id=${updateResult}`;
+      });
+
+      loadingWrapper.style.display = "none";
+      updatePage.style.display = "block";
+    </script>
+  </body>
+</html>

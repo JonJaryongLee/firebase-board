@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <body>
+      <p class="loading-wrapper">loading...</p>
+      <div class="list-page" style="display: none">
+        <h1>게시글 목록</h1>
+        <p class="login-info-container">
+          <span>현재 로그인한 사용자: </span>
+          <span class="current-user-email">current-user-email</span>
+        </p>
+        <ul class="article-ul">
+          <li class="title-data">
+            <a href="./detail.html?id=#">title</a>
+          </li>
+        </ul>
+        <div>
+          <a class="create-link" href="./create.html">게시글 생성</a>
+        </div>
+        <button class="logout-btn">로그아웃</button>
+      </div>
+
+      <script type="module">
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { auth } from "../app.js";
+        import { getArticles } from "./article.js";
+        import { logout } from "../auth/auth.js";
+
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            currentUserEmail.textContent = user.email;
+          } else {
+            logoutBtn.style.display = "none";
+            createLink.style.display = "none";
+            loginInfoContainer.style.display = "none";
+          }
+        });
+
+        const loadingWrapper = document.querySelector(".loading-wrapper");
+        const listPage = document.querySelector(".list-page");
+        const loginInfoContainer = document.querySelector(
+          ".login-info-container"
+        );
+        const currentUserEmail = document.querySelector(".current-user-email");
+        const articleUl = document.querySelector(".article-ul");
+        const logoutBtn = document.querySelector(".logout-btn");
+        const createLink = document.querySelector(".create-link");
+
+        logoutBtn.addEventListener("click", async () => {
+          await logout();
+          alert("로그아웃 되었습니다.");
+          location.href = "../index.html";
+        });
+
+        let articleLis = "";
+        const articles = await getArticles();
+        if (articles === "permission-denied") {
+          alert("권한이 없습니다.");
+          location.href = "../auth/login.html";
+        }
+        if (articles.length) {
+          articles.forEach((article) => {
+            articleLis += `
+            <li class="title-data">
+              <a href="./detail.html?id=${article.id}">
+                ${article.title}
+              </a>
+            </li>
+          `;
+          });
+          articleUl.innerHTML = articleLis;
+        } else {
+          articleUl.innerHTML = `<li>현재 작성된 게시글이 없습니다.</li>`;
+        }
+        loadingWrapper.style.display = "none";
+        listPage.style.display = "block";
+      </script>
+    </body>
+  </body>
+</html>

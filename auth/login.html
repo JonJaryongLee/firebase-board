@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>로그인</h1>
+    <div>
+      <input class="email-input" type="email" placeholder="이메일" />
+    </div>
+    <div>
+      <input class="pw-input" type="password" placeholder="비밀번호" />
+    </div>
+    <button class="login-btn">로그인</button>
+    <script type="module">
+      import { login } from "./auth.js";
+      const emailInput = document.querySelector(".email-input");
+      const pwInput = document.querySelector(".pw-input");
+      const loginBtn = document.querySelector(".login-btn");
+      async function handleLogin() {
+        if (
+          !emailInput.value ||
+          emailInput.value.trim() === "" ||
+          !pwInput.value ||
+          pwInput.value.trim() === ""
+        )
+          return;
+        const result = await login(emailInput.value, pwInput.value);
+
+        if (result === "auth/invalid-email") {
+          alert("유효한 이메일 형식이 아닙니다.");
+          return;
+        } else if (result === "auth/invalid-credential") {
+          alert("이메일이 등록되지 않았거나, 비밀번호가 틀렸습니다.");
+          return;
+        } else if (result === true) {
+          alert("로그인 성공");
+          location.href = "../article/list.html";
+        }
+      }
+      loginBtn.addEventListener("click", handleLogin);
+      pwInput.addEventListener("keyup", (evt) => {
+        if (evt.key === "Enter") {
+          handleLogin();
+        }
+      });
+    </script>
+  </body>
+</html>

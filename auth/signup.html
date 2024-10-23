@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>회원가입</h1>
+    <div>
+      <input class="email-input" type="email" placeholder="이메일" />
+    </div>
+    <div>
+      <input class="pw1-input" type="password" placeholder="비밀번호" />
+    </div>
+    <div>
+      <input class="pw2-input" type="password" placeholder="비밀번호 확인" />
+    </div>
+    <button class="signup-btn">회원가입</button>
+    <script type="module">
+      import { signup } from "./auth.js";
+      const emailInput = document.querySelector(".email-input");
+      const pw1Input = document.querySelector(".pw1-input");
+      const pw2Input = document.querySelector(".pw2-input");
+      const signupBtn = document.querySelector(".signup-btn");
+      async function handleSignup() {
+        if (
+          !emailInput.value ||
+          emailInput.value.trim() === "" ||
+          !pw1Input.value ||
+          pw1Input.value.trim() === "" ||
+          !pw2Input.value ||
+          pw2Input.value.trim() === ""
+        )
+          return;
+        if (pw1Input.value !== pw2Input.value) {
+          alert("두 비밀번호가 일치하지 않습니다.");
+          return;
+        }
+        const result = await signup(emailInput.value, pw1Input.value);
+        if (result === "auth/invalid-email") {
+          alert("유효한 이메일 형식이 아닙니다.");
+          return;
+        } else if (result === "auth/weak-password") {
+          alert("비밀번호는 6자 이상이여야 합니다.");
+          return;
+        } else if (result === "auth/email-already-in-use") {
+          alert("이미 존재하는 이메일입니다.");
+          return;
+        } else if (result === true) {
+          alert("회원가입이 성공적으로 완료되었습니다!");
+          location.href = "../article/list.html";
+        }
+      }
+      signupBtn.addEventListener("click", handleSignup);
+      pw2Input.addEventListener("keyup", (evt) => {
+        if (evt.key === "Enter") {
+          handleSignup();
+        }
+      });
+    </script>
+  </body>
+</html>
