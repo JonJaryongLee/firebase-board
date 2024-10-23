@@ -14,11 +14,15 @@
       <input class="pw-input" type="password" placeholder="비밀번호" />
     </div>
     <button class="login-btn">로그인</button>
+    <div>
+      <button class="google-login-btn">구글 로그인</button>
+    </div>
     <script type="module">
-      import { login } from "./auth.js";
+      import { login, googleSignup } from "./auth.js";
       const emailInput = document.querySelector(".email-input");
       const pwInput = document.querySelector(".pw-input");
       const loginBtn = document.querySelector(".login-btn");
+      const googleLoginBtn = document.querySelector(".google-login-btn");
       async function handleLogin() {
         if (
           !emailInput.value ||
@@ -40,12 +44,20 @@
           location.href = "../article/list.html";
         }
       }
+      async function handleGoogleLogin() {
+        const result = await googleSignup();
+        if (result.user.uid) {
+          alert("로그인 성공");
+          location.href = "../article/list.html";
+        }
+      }
       loginBtn.addEventListener("click", handleLogin);
       pwInput.addEventListener("keyup", (evt) => {
         if (evt.key === "Enter") {
           handleLogin();
         }
       });
+      googleLoginBtn.addEventListener("click", handleGoogleLogin);
     </script>
   </body>
 </html>

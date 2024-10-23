@@ -16,13 +16,19 @@
     <div>
       <input class="pw2-input" type="password" placeholder="비밀번호 확인" />
     </div>
-    <button class="signup-btn">회원가입</button>
+    <div>
+      <button class="signup-btn">회원가입</button>
+    </div>
+    <div>
+      <button class="google-signup-btn">구글 회원가입</button>
+    </div>
     <script type="module">
-      import { signup } from "./auth.js";
+      import { signup, googleSignup } from "./auth.js";
       const emailInput = document.querySelector(".email-input");
       const pw1Input = document.querySelector(".pw1-input");
       const pw2Input = document.querySelector(".pw2-input");
       const signupBtn = document.querySelector(".signup-btn");
+      const googleSignupBtn = document.querySelector(".google-signup-btn");
       async function handleSignup() {
         if (
           !emailInput.value ||
@@ -52,12 +58,20 @@
           location.href = "../article/list.html";
         }
       }
+      async function handleGoogleSignup() {
+        const result = await googleSignup();
+        if (result.user.uid) {
+          alert("회원가입이 성공적으로 완료되었습니다!");
+          location.href = "../article/list.html";
+        }
+      }
       signupBtn.addEventListener("click", handleSignup);
       pw2Input.addEventListener("keyup", (evt) => {
         if (evt.key === "Enter") {
           handleSignup();
         }
       });
+      googleSignupBtn.addEventListener("click", handleGoogleSignup);
     </script>
   </body>
 </html>
